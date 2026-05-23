@@ -6022,6 +6022,28 @@ body.vialae-modal-open .audio-panel {
 })();
 
 </script>
+<!-- ViALAe Telegram WebApp SDK v1.32.3 -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(function () {
+  function bootTelegramWebApp() {
+    try {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready && window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand && window.Telegram.WebApp.expand();
+        window.__VIALAE_TELEGRAM_SDK_READY__ = true;
+      }
+    } catch (e) {
+      window.__VIALAE_TELEGRAM_SDK_ERROR__ = String(e && e.message ? e.message : e);
+    }
+  }
+
+  bootTelegramWebApp();
+  setTimeout(bootTelegramWebApp, 250);
+  setTimeout(bootTelegramWebApp, 900);
+})();
+</script>
+
 <!-- ViALAe v1.32 Backend Bridge START -->
 <script>
 (function () {
@@ -6130,7 +6152,7 @@ body.vialae-modal-open .audio-panel {
       '  <h3>🏆 Classifica Reale</h3>',
       '  <div id="vialae-backend-status" class="muted">Connessione...</div>',
       '  <div id="vialae-backend-list"></div>',
-      '  <div class="muted" style="margin-top:10px">v1.32.2 Debug Save · Cloudflare D1</div>',
+      '  <div class="muted" style="margin-top:10px">v1.32.3 Telegram SDK · Cloudflare D1</div>',
       '</div>',
       '<button id="vialae-backend-toggle" type="button">🏆 Classifica</button>',
       '<button id="vialae-backend-ping" type="button">🌐</button>'
@@ -6609,8 +6631,8 @@ body.vialae-modal-open .audio-panel {
       level: d.textScore.level || 1,
       relics: 0,
       durationMs: 0,
-      clientRunId: "manual-v1322-" + Date.now() + "-" + score,
-      gameVersion: "v1.32.2-debug-save"
+      clientRunId: "manual-v1323-" + Date.now() + "-" + score,
+      gameVersion: "v1.32.3-telegram-sdk"
     };
 
     output("Invio punteggio a Cloudflare...<br><strong>" + score + "</strong> punti");
