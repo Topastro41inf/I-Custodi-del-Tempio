@@ -6152,7 +6152,7 @@ body.vialae-modal-open .audio-panel {
       '  <h3>🏆 Classifica Reale</h3>',
       '  <div id="vialae-backend-status" class="muted">Connessione...</div>',
       '  <div id="vialae-backend-list"></div>',
-      '  <div class="muted" style="margin-top:10px">v1.32.4 Classifica Top Left · Cloudflare D1</div>',
+      '  <div class="muted" style="margin-top:10px">v1.32.5 Clean Production · Classifica Reale</div>',
       '</div>',
       '<button id="vialae-backend-toggle" type="button">🏆 Classifica</button>',
       '<button id="vialae-backend-ping" type="button">🌐</button>'
@@ -6447,266 +6447,7 @@ body.vialae-modal-open .audio-panel {
 })();
 </script>
 <!-- ViALAe v1.32 Backend Bridge END -->
-<!-- ViALAe v1.32.2 Debug Save START -->
-<style>
-@media (max-width: 760px) {
-  #vialae-backend-bridge {
-    bottom: 88px !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-  }
-  #vialae-backend-panel {
-    bottom: 140px !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-    width: calc(100vw - 34px) !important;
-    max-height: 45vh !important;
-  }
-}
-#vialae-debug-save-box {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255,255,255,.10);
-}
-#vialae-debug-save-box button {
-  display: inline-block;
-  margin: 5px 5px 5px 0 !important;
-  border-radius: 999px !important;
-  padding: 7px 10px !important;
-  font-size: 12px !important;
-}
-#vialae-debug-save-output {
-  margin-top: 6px;
-  font-size: 12px;
-  line-height: 1.35;
-  opacity: .9;
-  white-space: normal;
-}
-</style>
-<script>
-(function () {
-  "use strict";
 
-  if (window.__VIALAE_DEBUG_SAVE_V1322__) return;
-  window.__VIALAE_DEBUG_SAVE_V1322__ = true;
-
-  const API_BASE = "https://vialae-custodi-api.ael41infinito.workers.dev";
-
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, function (c) {
-      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
-    });
-  }
-
-  function getTelegram() {
-    return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-  }
-
-  function getInitData() {
-    const tg = getTelegram();
-    return tg && typeof tg.initData === "string" ? tg.initData : "";
-  }
-
-  function output(html) {
-    const el = document.getElementById("vialae-debug-save-output");
-    if (el) el.innerHTML = html;
-  }
-
-  function findScoreFromText() {
-    const fullText = document.body ? document.body.innerText || "" : "";
-    const hits = [];
-
-    const patterns = [
-      /Record\s*[:\-]?\s*(\d{1,6})/gi,
-      /(\d{1,6})\s*PUNTI/gi,
-      /Punti\s*[:\-]?\s*(\d{1,6})/gi,
-      /Score\s*[:\-]?\s*(\d{1,6})/gi,
-      /Punteggio\s*[:\-]?\s*(\d{1,6})/gi
-    ];
-
-    patterns.forEach(function (re) {
-      let m;
-      while ((m = re.exec(fullText)) !== null) {
-        const n = Number(m[1]);
-        if (Number.isFinite(n) && n > 0 && n < 1000000) hits.push(n);
-      }
-    });
-
-    let level = 1;
-    const levelMatch = fullText.match(/Livello\s+([1-3])/i);
-    if (levelMatch) level = Number(levelMatch[1]);
-
-    const best = hits.length ? Math.max.apply(null, hits) : 0;
-    return { score: best, level: level, hits: hits.slice(0, 12) };
-  }
-
-  function findScoreFromLocalStorage() {
-    const hits = [];
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const value = localStorage.getItem(key) || "";
-        const blob = key + " " + value;
-
-        if (!/(vialae|custodi|tempio|score|punteggio|record|progress|livello|level|game)/i.test(blob)) continue;
-
-        const re = /(score|punteggio|punti|record|best|high)[^0-9]{0,30}(\d{1,6})/gi;
-        let m;
-        while ((m = re.exec(blob)) !== null) {
-          const n = Number(m[2]);
-          if (Number.isFinite(n) && n > 0 && n < 1000000) {
-            hits.push({ score: n, key: key });
-          }
-        }
-
-        try {
-          const parsed = JSON.parse(value);
-          const stack = [parsed];
-          for (let guard = 0; stack.length && guard < 300; guard++) {
-            const item = stack.pop();
-            if (!item || typeof item !== "object") continue;
-
-            const possible = item.score ?? item.bestScore ?? item.best_score ?? item.punteggio ?? item.punti ?? item.record;
-            const n = Number(possible);
-            if (Number.isFinite(n) && n > 0 && n < 1000000) hits.push({ score: n, key: key });
-
-            Object.keys(item).slice(0, 40).forEach(function (k) {
-              const v = item[k];
-              if (v && typeof v === "object") stack.push(v);
-            });
-          }
-        } catch {}
-      }
-    } catch {}
-
-    hits.sort(function (a, b) { return b.score - a.score; });
-    return hits[0] || { score: 0, key: "" };
-  }
-
-  function diagnose() {
-    const tg = getTelegram();
-    const initData = getInitData();
-    const textScore = findScoreFromText();
-    const lsScore = findScoreFromLocalStorage();
-    const bestScore = Math.max(textScore.score || 0, lsScore.score || 0);
-
-    output(
-      "<strong>Diagnosi</strong><br>" +
-      "Telegram rilevato: <strong>" + (tg ? "SÌ" : "NO") + "</strong><br>" +
-      "initData presente: <strong>" + (initData ? "SÌ" : "NO") + "</strong><br>" +
-      "Score visibile trovato: <strong>" + (textScore.score || 0) + "</strong><br>" +
-      "Score locale trovato: <strong>" + (lsScore.score || 0) + "</strong><br>" +
-      "Score scelto: <strong>" + bestScore + "</strong>"
-    );
-
-    return { tg: !!tg, initData, textScore, lsScore, bestScore };
-  }
-
-  async function saveManual() {
-    const d = diagnose();
-
-    if (!d.initData) {
-      output(
-        "<strong>Non posso salvare.</strong><br>" +
-        "Telegram non sta passando <code>initData</code> al gioco.<br>" +
-        "Apri il gioco dal menu button del bot, non da link normale."
-      );
-      return;
-    }
-
-    const score = d.bestScore;
-    if (!score || score <= 0) {
-      output(
-        "<strong>Non trovo un punteggio da salvare.</strong><br>" +
-        "Finisci una partita, torna alla schermata risultati, poi riprova."
-      );
-      return;
-    }
-
-    const payload = {
-      initData: d.initData,
-      score: score,
-      level: d.textScore.level || 1,
-      relics: 0,
-      durationMs: 0,
-      clientRunId: "manual-v1323-" + Date.now() + "-" + score,
-      gameVersion: "v1.32.3-telegram-sdk"
-    };
-
-    output("Invio punteggio a Cloudflare...<br><strong>" + score + "</strong> punti");
-
-    try {
-      let data;
-      if (window.ViALAEBackendBridge && typeof window.ViALAEBackendBridge.saveScore === "function") {
-        data = await window.ViALAEBackendBridge.saveScore(payload);
-      } else {
-        const res = await fetch(API_BASE + "/api/score", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Requested-With": "ViALAe-v1322-debug"
-          },
-          body: JSON.stringify(payload)
-        });
-        data = await res.json();
-      }
-
-      if (data && data.ok) {
-        output(
-          "<strong>✅ Salvato.</strong><br>" +
-          "Punteggio: <strong>" + score + "</strong><br>" +
-          "Ora riapri la Classifica."
-        );
-        if (window.ViALAEBackendBridge && typeof window.ViALAEBackendBridge.leaderboard === "function") {
-          setTimeout(function () { window.ViALAEBackendBridge.leaderboard(); }, 800);
-        }
-      } else {
-        output(
-          "<strong>❌ Non salvato.</strong><br>" +
-          "<code>" + escapeHtml(JSON.stringify(data || {}, null, 2)) + "</code>"
-        );
-      }
-    } catch (err) {
-      output(
-        "<strong>❌ Errore salvataggio.</strong><br>" +
-        escapeHtml(err && err.message ? err.message : String(err))
-      );
-    }
-  }
-
-  function ensureDebugBox() {
-    const panel = document.getElementById("vialae-backend-panel");
-    if (!panel || document.getElementById("vialae-debug-save-box")) return;
-
-    const box = document.createElement("div");
-    box.id = "vialae-debug-save-box";
-    box.innerHTML = [
-      '<button id="vialae-debug-check" type="button">🔎 Diagnosi</button>',
-      '<button id="vialae-debug-save" type="button">💾 Salva record</button>',
-      '<div id="vialae-debug-save-output">Apri dopo la partita e premi Diagnosi.</div>'
-    ].join("");
-
-    panel.appendChild(box);
-
-    document.getElementById("vialae-debug-check").addEventListener("click", diagnose);
-    document.getElementById("vialae-debug-save").addEventListener("click", saveManual);
-  }
-
-  function boot() {
-    ensureDebugBox();
-    setInterval(ensureDebugBox, 1200);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
-})();
-</script>
-<!-- ViALAe v1.32.2 Debug Save END -->
 <!-- ViALAe v1.32.4 Classifica Top Left START -->
 <style>
 /* v1.32.4 — sposta Classifica in alto a sinistra del Tempio */
@@ -6783,7 +6524,7 @@ body.vialae-modal-open .audio-panel {
     try {
       var el = document.querySelector("#vialae-backend-panel .muted:last-child");
       if (el && /Cloudflare D1/.test(el.textContent)) {
-        el.textContent = "v1.32.4 Classifica Top Left · Cloudflare D1";
+        el.textContent = "v1.32.5 Clean Production · Classifica Reale";
       }
     } catch (e) {}
   }
@@ -6796,5 +6537,336 @@ body.vialae-modal-open .audio-panel {
 })();
 </script>
 <!-- ViALAe v1.32.4 Classifica Top Left END -->
+<!-- ViALAe v1.32.5 Clean Production START -->
+<style>
+/* v1.32.5 — produzione pulita */
+#vialae-debug-save-box {
+  display: none !important;
+}
+
+/* Classifica piccola, alto sinistra */
+#vialae-backend-bridge {
+  top: 86px !important;
+  left: max(10px, calc(50% - 288px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+}
+
+#vialae-backend-bridge button {
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  min-height: 30px !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.30) !important;
+}
+
+#vialae-backend-bridge #vialae-backend-ping {
+  display: none !important;
+}
+
+#vialae-backend-panel {
+  top: 122px !important;
+  left: max(10px, calc(50% - 288px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(390px, calc(100vw - 22px)) !important;
+  max-height: 58vh !important;
+}
+
+@media (max-width: 760px) {
+  #vialae-backend-bridge {
+    top: 82px !important;
+    left: 10px !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  #vialae-backend-bridge button {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    min-height: 28px !important;
+  }
+
+  #vialae-backend-panel {
+    top: 116px !important;
+    left: 8px !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: calc(100vw - 18px) !important;
+    max-height: 60vh !important;
+  }
+}
+</style>
+<script>
+(function () {
+  "use strict";
+
+  if (window.__VIALAE_CLEAN_PRODUCTION_V1325__) return;
+  window.__VIALAE_CLEAN_PRODUCTION_V1325__ = true;
+
+  const API_BASE = "https://vialae-custodi-api.ael41infinito.workers.dev";
+  const GAME_VERSION = "v1.32.5-clean-production";
+  const MAX_SCORE = 999999;
+
+  const state = {
+    lastSavedScore: 0,
+    lastSavedAt: 0,
+    lastRunKey: "",
+    saving: false,
+    saveCount: 0
+  };
+
+  function getTelegram() {
+    return window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  }
+
+  function getInitData() {
+    const tg = getTelegram();
+    return tg && typeof tg.initData === "string" ? tg.initData : "";
+  }
+
+  function safeText() {
+    return document.body ? (document.body.innerText || "") : "";
+  }
+
+  function findScoreFromText() {
+    const fullText = safeText();
+    const hits = [];
+
+    const patterns = [
+      /Record\s*[:\-]?\s*(\d{1,6})/gi,
+      /(\d{1,6})\s*PUNTI/gi,
+      /Punti\s*[:\-]?\s*(\d{1,6})/gi,
+      /Score\s*[:\-]?\s*(\d{1,6})/gi,
+      /Punteggio\s*[:\-]?\s*(\d{1,6})/gi
+    ];
+
+    patterns.forEach(function (re) {
+      let m;
+      while ((m = re.exec(fullText)) !== null) {
+        const n = Number(m[1]);
+        if (Number.isFinite(n) && n > 0 && n < MAX_SCORE) hits.push(n);
+      }
+    });
+
+    let level = 1;
+    const levelMatch = fullText.match(/Livello\s+([1-3])/i);
+    if (levelMatch) level = Number(levelMatch[1]);
+
+    const score = hits.length ? Math.max.apply(null, hits) : 0;
+    return { score, level, source: "text" };
+  }
+
+  function findScoreFromLocalStorage() {
+    const hits = [];
+
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key) || "";
+        const blob = key + " " + value;
+
+        if (!/(vialae|custodi|tempio|score|punteggio|record|progress|livello|level|game)/i.test(blob)) continue;
+
+        const re = /(score|punteggio|punti|record|best|high)[^0-9]{0,30}(\d{1,6})/gi;
+        let m;
+        while ((m = re.exec(blob)) !== null) {
+          const n = Number(m[2]);
+          if (Number.isFinite(n) && n > 0 && n < MAX_SCORE) hits.push({ score: n, key });
+        }
+
+        try {
+          const parsed = JSON.parse(value);
+          const stack = [parsed];
+
+          for (let guard = 0; stack.length && guard < 300; guard++) {
+            const item = stack.pop();
+            if (!item || typeof item !== "object") continue;
+
+            const possible = item.score ?? item.bestScore ?? item.best_score ?? item.punteggio ?? item.punti ?? item.record;
+            const n = Number(possible);
+            if (Number.isFinite(n) && n > 0 && n < MAX_SCORE) hits.push({ score: n, key });
+
+            Object.keys(item).slice(0, 40).forEach(function (k) {
+              const v = item[k];
+              if (v && typeof v === "object") stack.push(v);
+            });
+          }
+        } catch {}
+      }
+    } catch {}
+
+    hits.sort(function (a, b) { return b.score - a.score; });
+    return hits[0] ? { score: hits[0].score, level: 1, source: "localStorage:" + hits[0].key } : { score: 0, level: 1, source: "localStorage" };
+  }
+
+  function bestCandidate() {
+    const fromText = findScoreFromText();
+    const fromStorage = findScoreFromLocalStorage();
+
+    if ((fromText.score || 0) >= (fromStorage.score || 0)) return fromText;
+    return fromStorage;
+  }
+
+  function updatePanelStatus(message) {
+    try {
+      const status = document.getElementById("vialae-backend-status");
+      if (status && message) status.innerHTML = message;
+    } catch {}
+  }
+
+  async function saveScoreSilently(candidate, reason) {
+    const initData = getInitData();
+    if (!initData) return { ok: false, skipped: true, reason: "initData assente" };
+    if (!candidate || !candidate.score) return { ok: false, skipped: true, reason: "score assente" };
+    if (state.saving) return { ok: false, skipped: true, reason: "save in corso" };
+
+    const score = Math.max(1, Math.min(MAX_SCORE, Math.trunc(Number(candidate.score) || 0)));
+    const level = Math.max(1, Math.min(3, Math.trunc(Number(candidate.level) || 1)));
+
+    if (score <= state.lastSavedScore && Date.now() - state.lastSavedAt < 1000 * 60 * 30) {
+      return { ok: false, skipped: true, reason: "già salvato" };
+    }
+
+    const runKey = level + ":" + score;
+    if (runKey === state.lastRunKey && Date.now() - state.lastSavedAt < 1000 * 60 * 30) {
+      return { ok: false, skipped: true, reason: "duplicato" };
+    }
+
+    state.saving = true;
+    state.lastRunKey = runKey;
+
+    const payload = {
+      initData: initData,
+      score: score,
+      level: level,
+      relics: 0,
+      durationMs: 0,
+      clientRunId: "auto-v1325-" + Date.now() + "-" + level + "-" + score,
+      gameVersion: GAME_VERSION,
+      source: candidate.source || reason || "auto"
+    };
+
+    try {
+      let data;
+      if (window.ViALAEBackendBridge && typeof window.ViALAEBackendBridge.saveScore === "function") {
+        data = await window.ViALAEBackendBridge.saveScore(payload);
+      } else {
+        const res = await fetch(API_BASE + "/api/score", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "ViALAe-v1325-clean"
+          },
+          body: JSON.stringify(payload)
+        });
+        data = await res.json();
+      }
+
+      if (data && data.ok) {
+        state.lastSavedScore = Math.max(state.lastSavedScore, score);
+        state.lastSavedAt = Date.now();
+        state.saveCount += 1;
+
+        updatePanelStatus('<span class="ok">Record salvato</span><br><span class="muted">' + score.toLocaleString("it-IT") + ' punti · Classifica reale attiva</span>');
+
+        if (window.ViALAEBackendBridge && typeof window.ViALAEBackendBridge.leaderboard === "function") {
+          setTimeout(function () { window.ViALAEBackendBridge.leaderboard(); }, 800);
+        }
+
+        return data;
+      }
+
+      return data || { ok: false, error: "Risposta vuota" };
+    } catch (err) {
+      return { ok: false, error: err && err.message ? err.message : String(err) };
+    } finally {
+      state.saving = false;
+    }
+  }
+
+  function shouldTryAutoSave() {
+    const txt = safeText();
+
+    if (/Nessun punteggio reale ancora salvato/i.test(txt)) return false;
+
+    /* Prova soprattutto su schermate di fine/risultato o quando appare un record. */
+    return /(Record|Punteggio|Punti|Vittoria|Completato|Salvato|Livello completato|Partita finita|Game Over)/i.test(txt);
+  }
+
+  function autoSaveTick() {
+    if (!getInitData()) return;
+    if (!shouldTryAutoSave()) return;
+
+    const candidate = bestCandidate();
+    if (!candidate.score) return;
+
+    saveScoreSilently(candidate, "tick");
+  }
+
+  function cleanDebugUi() {
+    try {
+      const debugBox = document.getElementById("vialae-debug-save-box");
+      if (debugBox) debugBox.remove();
+
+      const ping = document.getElementById("vialae-backend-ping");
+      if (ping) ping.remove();
+
+      const panel = document.getElementById("vialae-backend-panel");
+      if (panel) {
+        const muted = panel.querySelector(".muted:last-child");
+        if (muted && /Cloudflare D1/.test(muted.textContent || "")) {
+          muted.textContent = "v1.32.5 Clean Production · Classifica Reale";
+        }
+      }
+    } catch {}
+  }
+
+  function boot() {
+    try {
+      const tg = getTelegram();
+      if (tg) {
+        try { tg.ready && tg.ready(); } catch {}
+        try { tg.expand && tg.expand(); } catch {}
+      }
+    } catch {}
+
+    cleanDebugUi();
+    setInterval(cleanDebugUi, 1500);
+    setInterval(autoSaveTick, 5000);
+
+    window.addEventListener("vialae:score", function (event) {
+      if (event && event.detail) saveScoreSilently(event.detail, "event:vialae:score");
+    });
+
+    window.addEventListener("vialae:gameover", function (event) {
+      if (event && event.detail) saveScoreSilently(event.detail, "event:vialae:gameover");
+      else autoSaveTick();
+    });
+
+    window.ViALAECleanProduction = {
+      version: GAME_VERSION,
+      autoSaveNow: function () {
+        const candidate = bestCandidate();
+        return saveScoreSilently(candidate, "manual-console");
+      },
+      state: state
+    };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+})();
+</script>
+<!-- ViALAe v1.32.5 Clean Production END -->
 </body>
 </html>
