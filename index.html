@@ -6152,7 +6152,7 @@ body.vialae-modal-open .audio-panel {
       '  <h3>🏆 Classifica Reale</h3>',
       '  <div id="vialae-backend-status" class="muted">Connessione...</div>',
       '  <div id="vialae-backend-list"></div>',
-      '  <div class="muted" style="margin-top:10px">v1.32.7 Safe Clean · Classifica Reale</div>',
+      '  <div class="muted" style="margin-top:10px">v1.32.8 Emergency Restore · Classifica Reale</div>',
       '</div>',
       '<button id="vialae-backend-toggle" type="button">🏆 Classifica</button>',
       '<button id="vialae-backend-ping" type="button">🌐</button>'
@@ -6524,7 +6524,7 @@ body.vialae-modal-open .audio-panel {
     try {
       var el = document.querySelector("#vialae-backend-panel .muted:last-child");
       if (el && /Cloudflare D1/.test(el.textContent)) {
-        el.textContent = "v1.32.7 Safe Clean · Classifica Reale";
+        el.textContent = "v1.32.8 Emergency Restore · Classifica Reale";
       }
     } catch (e) {}
   }
@@ -6537,60 +6537,6 @@ body.vialae-modal-open .audio-panel {
 })();
 </script>
 <!-- ViALAe v1.32.4 Classifica Top Left END -->
-
-
-<!-- ViALAe v1.32.7 Safe Clean START -->
-<script>
-(function () {
-  "use strict";
-
-  if (window.__VIALAE_SAFE_CLEAN_V1327__) return;
-  window.__VIALAE_SAFE_CLEAN_V1327__ = true;
-
-  function cleanOldDemoText() {
-    try {
-      var nodes = Array.prototype.slice.call(document.querySelectorAll("body *"));
-
-      nodes.forEach(function (el) {
-        var txt = el && el.textContent ? el.textContent.trim() : "";
-        if (!txt) return;
-
-        if (/Demo\s+v1\.30/i.test(txt) && /ponte\s+backend\s+gi[aà]\s+pronto/i.test(txt)) {
-          /* NON rimuoviamo l'elemento o i suoi genitori.
-             Sostituiamo solo il testo vecchio: zero rischio di cancellare il menu. */
-          el.innerHTML = '<strong>Classifica reale attiva:</strong> progressi e punteggi collegati a Telegram e Cloudflare.';
-        }
-      });
-    } catch (e) {}
-  }
-
-  function markVersion() {
-    try {
-      var panel = document.getElementById("vialae-backend-panel");
-      if (!panel) return;
-      var muted = panel.querySelector(".muted:last-child");
-      if (muted && /Classifica|Cloudflare|D1/i.test(muted.textContent || "")) {
-        muted.textContent = "v1.32.7 Safe Clean · Classifica Reale";
-      }
-    } catch (e) {}
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      cleanOldDemoText();
-      markVersion();
-    }, { once: true });
-  } else {
-    cleanOldDemoText();
-    markVersion();
-  }
-
-  setTimeout(cleanOldDemoText, 400);
-  setTimeout(cleanOldDemoText, 1200);
-  setTimeout(markVersion, 1200);
-})();
-</script>
-<!-- ViALAe v1.32.7 Safe Clean END -->
 <!-- ViALAe v1.32.5 Clean Production START -->
 <style>
 /* v1.32.5 — produzione pulita */
@@ -6876,7 +6822,7 @@ body.vialae-modal-open .audio-panel {
       if (panel) {
         const muted = panel.querySelector(".muted:last-child");
         if (muted && /Cloudflare D1/.test(muted.textContent || "")) {
-          muted.textContent = "v1.32.5 Clean Production · Classifica Reale";
+          muted.textContent = "v1.32.8 Emergency Restore · Classifica Reale";
         }
       }
     } catch {}
