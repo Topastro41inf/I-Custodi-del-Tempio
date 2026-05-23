@@ -6152,7 +6152,7 @@ body.vialae-modal-open .audio-panel {
       '  <h3>🏆 Classifica Reale</h3>',
       '  <div id="vialae-backend-status" class="muted">Connessione...</div>',
       '  <div id="vialae-backend-list"></div>',
-      '  <div class="muted" style="margin-top:10px">v1.32.3 Telegram SDK · Cloudflare D1</div>',
+      '  <div class="muted" style="margin-top:10px">v1.32.4 Classifica Top Left · Cloudflare D1</div>',
       '</div>',
       '<button id="vialae-backend-toggle" type="button">🏆 Classifica</button>',
       '<button id="vialae-backend-ping" type="button">🌐</button>'
@@ -6707,5 +6707,94 @@ body.vialae-modal-open .audio-panel {
 })();
 </script>
 <!-- ViALAe v1.32.2 Debug Save END -->
+<!-- ViALAe v1.32.4 Classifica Top Left START -->
+<style>
+/* v1.32.4 — sposta Classifica in alto a sinistra del Tempio */
+#vialae-backend-bridge {
+  top: 86px !important;
+  left: max(10px, calc(50% - 288px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+}
+
+#vialae-backend-bridge button {
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  min-height: 30px !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.30) !important;
+}
+
+#vialae-backend-bridge #vialae-backend-ping {
+  width: 30px !important;
+  min-width: 30px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#vialae-backend-panel {
+  top: 122px !important;
+  left: max(10px, calc(50% - 288px)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(390px, calc(100vw - 22px)) !important;
+  max-height: 58vh !important;
+}
+
+@media (max-width: 760px) {
+  #vialae-backend-bridge {
+    top: 82px !important;
+    left: 10px !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  #vialae-backend-bridge button {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    min-height: 28px !important;
+  }
+
+  #vialae-backend-bridge #vialae-backend-ping {
+    width: 28px !important;
+    min-width: 28px !important;
+  }
+
+  #vialae-backend-panel {
+    top: 116px !important;
+    left: 8px !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: calc(100vw - 18px) !important;
+    max-height: 60vh !important;
+  }
+}
+</style>
+<script>
+(function () {
+  "use strict";
+  function markVersion() {
+    try {
+      var el = document.querySelector("#vialae-backend-panel .muted:last-child");
+      if (el && /Cloudflare D1/.test(el.textContent)) {
+        el.textContent = "v1.32.4 Classifica Top Left · Cloudflare D1";
+      }
+    } catch (e) {}
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", markVersion, { once: true });
+  } else {
+    markVersion();
+  }
+  setTimeout(markVersion, 1200);
+})();
+</script>
+<!-- ViALAe v1.32.4 Classifica Top Left END -->
 </body>
 </html>
