@@ -6152,7 +6152,7 @@ body.vialae-modal-open .audio-panel {
       '  <h3>🏆 Classifica Reale</h3>',
       '  <div id="vialae-backend-status" class="muted">Connessione...</div>',
       '  <div id="vialae-backend-list"></div>',
-      '  <div class="muted" style="margin-top:10px">v1.32.5 Clean Production · Classifica Reale</div>',
+      '  <div class="muted" style="margin-top:10px">v1.32.6 Clean Temple · Classifica Reale</div>',
       '</div>',
       '<button id="vialae-backend-toggle" type="button">🏆 Classifica</button>',
       '<button id="vialae-backend-ping" type="button">🌐</button>'
@@ -6524,7 +6524,7 @@ body.vialae-modal-open .audio-panel {
     try {
       var el = document.querySelector("#vialae-backend-panel .muted:last-child");
       if (el && /Cloudflare D1/.test(el.textContent)) {
-        el.textContent = "v1.32.5 Clean Production · Classifica Reale";
+        el.textContent = "v1.32.6 Clean Temple · Classifica Reale";
       }
     } catch (e) {}
   }
@@ -6822,7 +6822,7 @@ body.vialae-modal-open .audio-panel {
       if (panel) {
         const muted = panel.querySelector(".muted:last-child");
         if (muted && /Cloudflare D1/.test(muted.textContent || "")) {
-          muted.textContent = "v1.32.5 Clean Production · Classifica Reale";
+          muted.textContent = "v1.32.6 Clean Temple · Classifica Reale";
         }
       }
     } catch {}
@@ -6868,5 +6868,79 @@ body.vialae-modal-open .audio-panel {
 })();
 </script>
 <!-- ViALAe v1.32.5 Clean Production END -->
+<!-- ViALAe v1.32.6 Remove Demo Box START -->
+<script>
+(function () {
+  "use strict";
+
+  if (window.__VIALAE_REMOVE_DEMO_BOX_V1326__) return;
+  window.__VIALAE_REMOVE_DEMO_BOX_V1326__ = true;
+
+  function hasDemoText(el) {
+    if (!el || !el.textContent) return false;
+    return /Demo\s+v1\.30/i.test(el.textContent);
+  }
+
+  function scoreElement(el) {
+    if (!el || !el.textContent) return 0;
+    var t = el.textContent;
+    var score = 0;
+    if (/Demo\s+v1\.30/i.test(t)) score += 10;
+    if (/ponte\s+backend\s+gi[aà]\s+pronto/i.test(t)) score += 4;
+    if (/UI\s+pulita/i.test(t)) score += 3;
+    if (/musica\s+reale/i.test(t)) score += 2;
+    return score;
+  }
+
+  function findBestContainer(start) {
+    var node = start;
+    var best = start;
+    var bestScore = scoreElement(start);
+
+    for (var i = 0; node && node !== document.body && i < 7; i++) {
+      var s = scoreElement(node);
+      var rect = node.getBoundingClientRect ? node.getBoundingClientRect() : { width: 0, height: 0 };
+
+      if (
+        s >= bestScore &&
+        rect.width > 180 &&
+        rect.height > 30 &&
+        rect.height < 220
+      ) {
+        best = node;
+        bestScore = s;
+      }
+
+      node = node.parentElement;
+    }
+
+    return best;
+  }
+
+  function removeDemoBox() {
+    try {
+      var all = Array.prototype.slice.call(document.querySelectorAll("body *"));
+      var hits = all.filter(hasDemoText);
+
+      hits.forEach(function (hit) {
+        var box = findBestContainer(hit);
+        if (box && box !== document.body) {
+          box.remove();
+        }
+      });
+    } catch (e) {}
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", removeDemoBox, { once: true });
+  } else {
+    removeDemoBox();
+  }
+
+  setTimeout(removeDemoBox, 500);
+  setTimeout(removeDemoBox, 1500);
+})();
+</script>
+<!-- ViALAe v1.32.6 Remove Demo Box END -->
 </body>
 </html>
