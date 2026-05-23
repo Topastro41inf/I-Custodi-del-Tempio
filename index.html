@@ -6152,7 +6152,7 @@ body.vialae-modal-open .audio-panel {
       '  <h3>🏆 Classifica Reale</h3>',
       '  <div id="vialae-backend-status" class="muted">Connessione...</div>',
       '  <div id="vialae-backend-list"></div>',
-      '  <div class="muted" style="margin-top:10px">v1.33 Core Clean · Classifica Reale</div>',
+      '  <div class="muted" style="margin-top:10px">v1.33.1 Stable Restore · Classifica Reale</div>',
       '</div>',
       '<button id="vialae-backend-toggle" type="button">🏆 Classifica</button>',
       '<button id="vialae-backend-ping" type="button">🌐</button>'
@@ -6524,7 +6524,7 @@ body.vialae-modal-open .audio-panel {
     try {
       var el = document.querySelector("#vialae-backend-panel .muted:last-child");
       if (el && /Cloudflare D1/.test(el.textContent)) {
-        el.textContent = "v1.33 Core Clean · Classifica Reale";
+        el.textContent = "v1.33.1 Stable Restore · Classifica Reale";
       }
     } catch (e) {}
   }
@@ -6822,7 +6822,7 @@ body.vialae-modal-open .audio-panel {
       if (panel) {
         const muted = panel.querySelector(".muted:last-child");
         if (muted && /Cloudflare D1/.test(muted.textContent || "")) {
-          muted.textContent = "v1.33 Core Clean · Classifica Reale";
+          muted.textContent = "v1.33.1 Stable Restore · Classifica Reale";
         }
       }
     } catch {}
@@ -6868,71 +6868,5 @@ body.vialae-modal-open .audio-panel {
 })();
 </script>
 <!-- ViALAe v1.32.5 Clean Production END -->
-<!-- ViALAe v1.33 Core Clean START -->
-<script>
-(function () {
-  "use strict";
-
-  if (window.__VIALAE_CORE_CLEAN_V133__) return;
-  window.__VIALAE_CORE_CLEAN_V133__ = true;
-
-  function replaceOnlyOldDemoText() {
-    try {
-      var nodes = Array.prototype.slice.call(document.querySelectorAll("body *"));
-
-      nodes.forEach(function (el) {
-        if (!el || !el.textContent) return;
-
-        var text = el.textContent.trim();
-        if (!/Demo\s+v1\.30/i.test(text)) return;
-        if (!/classifica\s+demo|ponte\s+backend/i.test(text)) return;
-
-        /*
-          Sicuro: NON rimuove elementi, NON risale ai parent.
-          Cambia solo il contenuto del box già esistente.
-        */
-        el.innerHTML = '<strong>Classifica reale attiva:</strong> progressi e punteggi collegati a Telegram e Cloudflare.';
-      });
-    } catch (e) {}
-  }
-
-  function cleanDebugResidues() {
-    try {
-      var debug = document.getElementById("vialae-debug-save-box");
-      if (debug) debug.remove();
-
-      var ping = document.getElementById("vialae-backend-ping");
-      if (ping) ping.remove();
-    } catch (e) {}
-  }
-
-  function markCleanVersion() {
-    try {
-      var panel = document.getElementById("vialae-backend-panel");
-      if (!panel) return;
-      var muted = panel.querySelector(".muted:last-child");
-      if (muted && /Classifica|Cloudflare|D1/i.test(muted.textContent || "")) {
-        muted.textContent = "v1.33 Core Clean · Classifica Reale";
-      }
-    } catch (e) {}
-  }
-
-  function boot() {
-    replaceOnlyOldDemoText();
-    cleanDebugResidues();
-    markCleanVersion();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot, { once: true });
-  } else {
-    boot();
-  }
-
-  setTimeout(boot, 400);
-  setTimeout(boot, 1400);
-})();
-</script>
-<!-- ViALAe v1.33 Core Clean END -->
 </body>
 </html>
